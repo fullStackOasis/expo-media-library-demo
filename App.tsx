@@ -15,6 +15,8 @@ import {
   Text,
   useColorScheme,
   View,
+  Button,
+  Alert
 } from 'react-native';
 
 import {
@@ -24,6 +26,8 @@ import {
   LearnMoreLinks,
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
+
+import * as MediaLibrary from 'expo-media-library';
 
 type SectionProps = PropsWithChildren<{
   title: string;
@@ -62,6 +66,33 @@ function App(): JSX.Element {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
 
+  /**
+   * Request media library permissions, and Alert the result.
+   */
+  const pickImage = async () => {
+    const p = await MediaLibrary.requestPermissionsAsync(false);
+    // If tapping outside the system dialog, you will see:
+    // {"status":"denied","canAskAgain":false,"granted":false,"expires":"never"}
+    // It seems odd that canAskAgain is false, yet we are allowed to ask again.
+    const { status } = p;
+    const granted = 'granted' == status;
+    const title = 'Media Library Access ' + (granted ? 'Granted' : 'Denied');
+    const msg = granted ? 'App has access to media library' :
+      'Use system settings to allow media library access';
+    Alert.alert(title,
+      msg,
+      [
+        {
+          text: 'OK',
+          onPress: () => {
+            console.log('called onPress');
+          },
+          style: 'cancel'
+        }
+      ]
+    );
+  };
+
   return (
     <SafeAreaView style={backgroundStyle}>
       <StatusBar
@@ -76,6 +107,9 @@ function App(): JSX.Element {
           style={{
             backgroundColor: isDarkMode ? Colors.black : Colors.white,
           }}>
+          <Button title="Open Media Library"
+            onPress={pickImage}
+          ></Button>
           <Section title="Step One">
             Edit <Text style={styles.highlight}>App.tsx</Text> to change this
             screen and then come back to see your edits.
